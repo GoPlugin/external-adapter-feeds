@@ -1,0 +1,1 @@
+# external-adapter-feeds
