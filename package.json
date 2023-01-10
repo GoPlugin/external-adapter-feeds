@@ -1,0 +1,27 @@
+{
+  "name": "external-adapter-feeds",
+  "version": "1.0.0",
+  "license": "MIT",
+  "dependencies": {
+    "@goplugin/external-adapter": "^1.0.1",
+    "body-parser": "^1.18.3",
+    "dotenv": "^10.0.0",
+    "express": "^4.18.2",
+    "request": "^2.88.2"
+  },
+  "description": "``` cd adapter npm install npm start ```",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Naresh Mohanraj (@GoPlugin)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoPlugin/external-adapter-feeds.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GoPlugin/external-adapter-feeds/issues"
+  },
+  "homepage": "https://github.com/GoPlugin/external-adapter-feeds#readme"
+}
