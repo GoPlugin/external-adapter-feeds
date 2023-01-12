@@ -8,19 +8,18 @@ const customError = (data) => {
 
 const Request_TL_TraderMade = (input, provider, callback) => {
   console.log("API Provider Source :", provider);
-  const url = `https://goplugin.apidiscovery.teejlab.com/edsn/api/gateway?endpoint_id=aHHfTVb`
 
   var dataString = { "from": `${input.data._fsyms}`, "to": `${input.data._tsyms}`, "amount": 1 };
   const config = {
-    url,
     method: "POST",
     data: dataString,
   }
 
-  if (process.env.API_KEY) {
+  if (process.env.API_KEY && process.env.TRADERMADE_TL_URL) {
     config.headers = {
       "api-key": process.env.API_KEY
     }
+    config.url = process.env.TRADERMADE_TL_URL;
   }
   Requester.request(config, customError)
     .then(response => {

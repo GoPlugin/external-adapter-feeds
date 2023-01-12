@@ -8,19 +8,18 @@ const customError = (data) => {
 
 const Request_TL_CoinLayer = (input, provider, callback) => {
   console.log("API Provider Source :", provider);
-  const url = `https://goplugin.apidiscovery.teejlab.com/edsn/api/gateway?endpoint_id=aTHHVVb`
 
   var dataString = { "symbols": `${input.data._fsyms}`, "target": `${input.data._tsyms}` };
   const config = {
-    url,
     method: "POST",
     data: dataString,
   }
 
-  if (process.env.API_KEY) {
+  if (process.env.API_KEY && process.env.COINLAYER_TL_URL) {
     config.headers = {
       "api-key": process.env.API_KEY
     }
+    config.url = process.env.COINLAYER_TL_URL;
   }
   Requester.request(config, customError)
     .then(response => {

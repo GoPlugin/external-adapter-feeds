@@ -8,19 +8,19 @@ const customError = (data) => {
 
 const Request_TL_Binance = (input, provider, callback) => {
   console.log("API Provider Source :", provider);
-  const url = `https://goplugin.apidiscovery.teejlab.com/edsn/api/gateway?endpoint_id=aHBNVab`
+
   var dataString = { "symbol": `${input.data._fsyms}${input.data._tsyms}` };
 
   const config = {
-    url,
     method: "POST",
     data: dataString,
   }
 
-  if (process.env.API_KEY) {
+  if (process.env.API_KEY && process.env.BINANCE_TL_URL) {
     config.headers = {
       "api-key": process.env.API_KEY
     }
+    config.url = process.env.BINANCE_TL_URL;
   }
   Requester.request(config, customError)
     .then(response => {

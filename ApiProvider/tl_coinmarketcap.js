@@ -8,20 +8,19 @@ const customError = (data) => {
 
 const Request_TL_CoinMarketCap = (input, provider, callback) => {
   console.log("API Provider Source :", provider);
-  const url = `https://goplugin.apidiscovery.teejlab.com/edsn/api/gateway?endpoint_id=aHBHTib`
 
   var dataString = { "convert": `${input.data._tsyms}`, "symbol": `${input.data._fsyms}` };
 
   const config = {
-    url,
     method: "POST",
     data: dataString,
   }
 
-  if (process.env.API_KEY) {
+  if (process.env.API_KEY && process.env.COINMARKETCAP_TL_URL) {
     config.headers = {
       "api-key": process.env.API_KEY
     }
+    config.url = process.env.COINMARKETCAP_TL_URL;
   }
   Requester.request(config, customError)
     .then(response => {

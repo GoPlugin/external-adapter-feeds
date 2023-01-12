@@ -1,4 +1,4 @@
-const constants = require('./constants')
+const constants = require("./constants")
 const Request_TL_Cryptocompare = require('./ApiProvider/tl_cryptocompare').Request_TL_Cryptocompare
 const Request_TL_Binance = require('./ApiProvider/tl_binance').Request_TL_Binance
 const Request_TL_Zylalabs = require('./ApiProvider/tl_zylalabs').Request_TL_Zylalabs
