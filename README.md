@@ -31,7 +31,7 @@ Add the API url's for each provider in .env file (use same variable names as men
 BINANCE_TL_URL="teej lab binance api url"  
 CRYPTOCOMPARE_TL_URL="teej lab cryptocompare api url"  
 COINCAP_TL_URL="teej lab coincap api url"  
-COINGECKO_TL_URL="teej lab coincap api url"  
+COINGECKO_TL_URL="teej lab coingecko api url"  
 COINMARKETCAP_TL_URL="teej lab coinmarketcap api url"  
 COINLAYER_TL_URL="teej lab coinlayer api url"  
 KUCOIN_TL_URL="teej lab kucoin api url"  
