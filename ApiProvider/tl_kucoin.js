@@ -27,7 +27,7 @@ const Request_TL_Kucoin = (input, provider, callback) => {
             var price = null;
             response.data.data.ticker.forEach(element => {
                 if (element["symbol"] === symbolStr) {
-                    price = element["buy"];
+                    price = element["last"];
                 }
             });
             const res = {
