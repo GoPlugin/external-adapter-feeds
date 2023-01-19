@@ -23,26 +23,14 @@ cd external-adapter-feeds
 npm install  
   
 Step 3:  
-Create a ".env" file and save your teejlab api key in below format(use same variable names as mentioned below).  
+Modify ".env" file and save your teejlab api key in below format(use same variable names as mentioned below).  
 API_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX  
-
-Step 4:  
-Add the API url's for each provider in .env file (use same variable names as mentioned below).  
-BINANCE_TL_URL="teej lab binance api url"  
-CRYPTOCOMPARE_TL_URL="teej lab cryptocompare api url"  
-COINCAP_TL_URL="teej lab coincap api url"  
-COINGECKO_TL_URL="teej lab coingecko api url"  
-COINMARKETCAP_TL_URL="teej lab coinmarketcap api url"  
-COINLAYER_TL_URL="teej lab coinlayer api url"  
-KUCOIN_TL_URL="teej lab kucoin api url"  
-TRADERMADE_TL_URL="teej lab tradermade api url"  
-ZYLALABS_TL_URL="teej lab zylalabs api url"  
   
-Step 5:  
+Step 4:  
 Start the server by executing below command.  
 pm2 start services.js
 
-Step 6:  
+Step 5:  
 Create bridge on plugin UI for each provider with below url having same port(eg: 5001)  
 http://localhost:5001/tl_binance  
 http://localhost:5001/tl_cryptocompare  
@@ -54,7 +42,7 @@ http://localhost:5001/tl_kucoin
 http://localhost:5001/tl_tradermade  
 http://localhost:5001/tl_zylalabs  - for commodities  
 
-Step 7:  
+Step 6:  
 Create jobs with above bridges for price feeds from different sources.  
 
 
