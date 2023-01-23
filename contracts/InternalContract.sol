@@ -2,19 +2,21 @@ pragma solidity 0.4.24;
 
 import "@goplugin/contracts/src/v0.4/vendor/Ownable.sol";
 import "@goplugin/contracts/src/v0.4/PluginClient.sol";
+import "@goplugin/contracts/src/v0.4/vendor/SafeMathPlugin.sol";
+
 
 contract InternalContract is PluginClient, Ownable {
+  using SafeMathPlugin for uint256;
   
   address private constant REGISTRARADDRESS=address(0xeF0eef30A645Aa9c39D4383321cCc0DF906ff12c); //DO NOT REMOVE THIS
   uint256 private constant REGISTRARFEE = 0.0001 * 10**18;   //DO NOT REMOVE THIS
   //Initialize Oracle Payment     
-  uint256 constant private ORACLE_PAYMENT = 0.1 * 10**18;
+  uint256 public ORACLE_PAYMENT = 0.1 * 10**18;
   address public oracle;  // "0x97A6d407f4CD30936679d0a28A3bc2A7F13a2185"
   string  public jobId;   // "32abe898ea834e328ebeb714c5a0991d"
   uint256 public currentValue;
   uint256 public latestTimestamp;
 
-  uint256 public oraclefee;
 
   //struct to keep track of PLI Deposits
   struct PLIDatabase{
@@ -25,14 +27,14 @@ contract InternalContract is PluginClient, Ownable {
   mapping(address => PLIDatabase) public plidbs;
 
   //Initialize event RequestFulfilled   
-  event RequestFulfilled(
-    bytes32 indexed requestId,
-    uint256 indexed currentVal
-  );
-
+  event RequestFulfilled(bytes32 indexed requestId,uint256 indexed currentVal,uint256 timestamp);
   //Initialize event requestCreated   
-  event requestCreated(address indexed requester,bytes32 indexed jobId, bytes32 indexed requestId);
-  event requestCreatedTest(bytes32 indexed jobId, bytes32 indexed requestId);
+  event requestCreated(address indexed requester,bytes32 indexed jobId, bytes32 indexed requestId,uint256 timestamp);
+  event requestCreatedTest(bytes32 indexed jobId, bytes32 indexed requestId,uint256 timestamp);
+  event oracleFeeModified(address indexed owner,uint256 indexed oraclefee,uint256 timestamp);
+  event pliDeposited(address indexed owner,uint256 indexed amount,uint256 timestamp);
+  event withdrawnPli(address indexed owner,uint256 indexed amount,uint256 timestamp);
+  event canceledPluginRequest(address indexed owner,bytes32 indexed requestID,uint256 indexed payment,uint256 expiration,uint256 timestamp);
 
   //Constructor to pass Pli Token Address during deployment
   constructor(address _pli,address _oracle,string memory _jobid) public Ownable() {
@@ -48,11 +50,12 @@ contract InternalContract is PluginClient, Ownable {
       pli.transferFrom(msg.sender,address(this),_value);
       //Track the PLI deposited for the user
       PLIDatabase memory _plidb = plidbs[msg.sender];
-      uint256 _totalCredits = _plidb.totalcredits + _value;
+      uint256 _totalCredits = _plidb.totalcredits.add(_value);
       plidbs[msg.sender] = PLIDatabase(
         msg.sender,
         _totalCredits
       );
+      emit pliDeposited(msg.sender,_value,block.timestamp);
       return true;
   }
 
@@ -60,13 +63,22 @@ contract InternalContract is PluginClient, Ownable {
     return currentValue;
   }
 
-  function getOracleFee(address _callee) internal returns(uint256){
+  //set Oracle fee in wei
+  function setOracleFee(uint256 _fee) public onlyOwner {
+      require(_fee > 0,"invalid fee");
+      require(_fee != ORACLE_PAYMENT,"input fee is same as existing fee");
+      ORACLE_PAYMENT = _fee;
+      emit oracleFeeModified(msg.sender,ORACLE_PAYMENT,block.timestamp);
+  }  
+
+  function getOracleFee(address _callee) internal view returns(uint256){  
+    uint256 oracleFee;
     if((REGISTRARADDRESS==_callee)){
-      oraclefee = REGISTRARFEE;
+      oracleFee = REGISTRARFEE;
     }else{
-      oraclefee = ORACLE_PAYMENT;
+      oracleFee = ORACLE_PAYMENT;
     }
-    return oraclefee;
+    return oracleFee;
   }
 
   //_fsyms should be the name of your source token from which you want the comparison 
@@ -82,16 +94,16 @@ contract InternalContract is PluginClient, Ownable {
     //Check the total Credits available for the user to perform the transaction
     uint256 _a_totalCredits = plidbs[_caller].totalcredits;
     require(_a_totalCredits>_fee,"NO_SUFFICIENT_CREDITS");
-    plidbs[_caller].totalcredits = _a_totalCredits - _fee;
+    plidbs[_caller].totalcredits = _a_totalCredits.sub(_fee);
     
     //Built a oracle request with the following params
     Plugin.Request memory req = buildPluginRequest(stringToBytes32(jobId), this, this.fulfill.selector);
-    req.add("_fsyms","XDC");
+    req.add("_fsyms","BTC");
     req.add("_tsyms","USDT");
     req.addInt("times", 10000);
     requestId = sendPluginRequestTo(oracle, req, _fee);
     latestTimestamp = block.timestamp;
-    emit requestCreated(_caller, stringToBytes32(jobId), requestId);
+    emit requestCreated(_caller, stringToBytes32(jobId), requestId,latestTimestamp);
   }
 
  function testMyFunc()
@@ -102,13 +114,13 @@ contract InternalContract is PluginClient, Ownable {
     uint256 _fee = 0.001 * 10**18;
     //Built a oracle request with the following params
     Plugin.Request memory req = buildPluginRequest(stringToBytes32(jobId), this, this.fulfill.selector);
-    req.add("_fsyms","XDC");
+    req.add("_fsyms","BTC");
     req.add("_tsyms","USDT");
     req.addInt("times", 10000);
 
     latestTimestamp = block.timestamp;
     requestId = sendPluginRequestTo(oracle, req, _fee);
-    emit requestCreatedTest(stringToBytes32(jobId), requestId);
+    emit requestCreatedTest(stringToBytes32(jobId), requestId,latestTimestamp);
   }
 
 
@@ -119,7 +131,7 @@ contract InternalContract is PluginClient, Ownable {
   {
     // if that speed < 65kmph
     // do write logic for token transfer
-    emit RequestFulfilled(_requestId, _currentval);
+    emit RequestFulfilled(_requestId, _currentval,block.timestamp);
     currentValue = _currentval;
   }
 
@@ -130,7 +142,9 @@ contract InternalContract is PluginClient, Ownable {
   //With draw pli can be invoked only by owner
   function withdrawPli() public onlyOwner {
     PliTokenInterface pli = PliTokenInterface(pluginTokenAddress());
-    require(pli.transfer(msg.sender, pli.balanceOf(address(this))), "Unable to transfer");
+    uint256 pliBalance =  pli.balanceOf(address(this));
+    require(pli.transfer(msg.sender,pliBalance), "Unable to transfer");
+    emit withdrawnPli(msg.sender, pliBalance,block.timestamp);
   }
 
   //Cancel the existing request
@@ -144,6 +158,7 @@ contract InternalContract is PluginClient, Ownable {
     onlyOwner
   {
     cancelPluginRequest(_requestId, _payment, _callbackFunctionId, _expiration);
+    emit canceledPluginRequest(msg.sender,_requestId,_payment,_expiration,block.timestamp);
   }
 
   //String to bytes to convert jobid to bytest32
