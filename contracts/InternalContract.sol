@@ -16,6 +16,8 @@ contract InternalContract is PluginClient, Ownable {
   string  public jobId;   // "32abe898ea834e328ebeb714c5a0991d"
   uint256 public currentValue;
   uint256 public latestTimestamp;
+  string public fsyms; // from symbol eg- BTC
+  string public tsyms; // to symbol eg- USDT
 
 
   //struct to keep track of PLI Deposits
@@ -37,10 +39,12 @@ contract InternalContract is PluginClient, Ownable {
   event canceledPluginRequest(address indexed owner,bytes32 indexed requestID,uint256 indexed payment,uint256 expiration,uint256 timestamp);
 
   //Constructor to pass Pli Token Address during deployment
-  constructor(address _pli,address _oracle,string memory _jobid) public Ownable() {
+  constructor(address _pli,address _oracle,string memory _jobid,string memory _fsyms, string memory _tsyms) public Ownable() {
     setPluginToken(_pli);
     oracle = address(_oracle);
     jobId = _jobid;
+    fsyms = _fsyms;
+    tsyms = _tsyms;
   }
 
   function depositPLI(uint256 _value) public returns(bool) {
@@ -98,8 +102,8 @@ contract InternalContract is PluginClient, Ownable {
     
     //Built a oracle request with the following params
     Plugin.Request memory req = buildPluginRequest(stringToBytes32(jobId), this, this.fulfill.selector);
-    req.add("_fsyms","BTC");
-    req.add("_tsyms","USDT");
+    req.add("_fsyms",fsyms);
+    req.add("_tsyms",tsyms);
     req.addInt("times", 10000);
     requestId = sendPluginRequestTo(oracle, req, _fee);
     latestTimestamp = block.timestamp;
@@ -114,8 +118,8 @@ contract InternalContract is PluginClient, Ownable {
     uint256 _fee = 0.001 * 10**18;
     //Built a oracle request with the following params
     Plugin.Request memory req = buildPluginRequest(stringToBytes32(jobId), this, this.fulfill.selector);
-    req.add("_fsyms","BTC");
-    req.add("_tsyms","USDT");
+    req.add("_fsyms",fsyms);
+    req.add("_tsyms",tsyms);
     req.addInt("times", 10000);
 
     latestTimestamp = block.timestamp;
