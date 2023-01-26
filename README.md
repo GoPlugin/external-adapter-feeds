@@ -45,6 +45,12 @@ http://localhost:5001/tl_zylalabs  - for commodities
 Step 6:  
 Create jobs with above bridges for price feeds from different sources.  
 
+Note:   
+While Setting up the parameters for constructor call of Internal Contract, Kindly ensure the fsyms & tsyms parameters are enclosed within quotes.  
+<img width="194" alt="image" src="https://user-images.githubusercontent.com/108452476/214764509-a56e1a95-aa52-4fb1-9331-ed19a6767cd7.png">
+
+
+
 
 
 
