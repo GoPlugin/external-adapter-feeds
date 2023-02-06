@@ -9,7 +9,7 @@ const customError = (data) => {
 const Request_TL_Zylalabs = (input, provider, callback) => {
   console.log("API Provider Source :", provider);
 
-  var dataString = { "fsyms": `${input.data._fsyms}` };
+  var dataString = { "base": `${input.data._fsyms}` };
   const config = {
     method: "POST",
     data: dataString,
